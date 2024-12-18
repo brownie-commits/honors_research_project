@@ -347,7 +347,7 @@ model10 <- lm(psppsgva ~ stfeco + hincfel + imueclt + prtvtfnl + edlvenl + gndr 
 
 summary(model10)
 
-# github test
+
 
 
 
