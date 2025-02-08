@@ -109,7 +109,7 @@ Research_DataANES$income <- ifelse(Research_DataANES$V161361x %in% c(-5, -9), NA
 
 table(Research_DataANES$income)
 
-# gender -> cgender # 
+# sex -> csex # 
 
 table(Research_DataANES$V161342)
 
