@@ -215,7 +215,7 @@ table(Research_DataANES$pplrule, Research_DataANES$votechoice)
 
 prop.table(table_row, margin = 1) * 100  
 
-# Linear Regression # 
+# Simple Linear Regression # 
 
 install.packages("stargazer")
 library(stargazer)
