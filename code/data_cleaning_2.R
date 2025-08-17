@@ -1,23 +1,149 @@
+######################################################################
+
+# Data Cleaning
+
+# Date: 8-16-2025
+
+# Author: Austin J. Brown
+
+######################################################################
+
+
+# Data import -------------------------------------------------------------
+
 #### STATA Research - ANES 2016 #####
 
-# Load Packages # 
-
-library(tidyverse)
-library(haven)
-library(car)
-
 # Load ANES 2016 data into R # 
-Research_DataANES <- read_dta("C:/Users/brown/Downloads/Research_DataANES.dta")
 
-View(Research_DataANES)
+anes <- read_dta("data/Research_DataANES.dta")
 
-# Recoding Variables # 
+Research_DataANES <- read_dta("data/Research_DataANES.dta")
 
-# poltrst -> rpoltrst# 
+ess <- read_dta("data/Research_DataESS_Clean.dta")
+
+# Data Cleaning -----------------------------------------------------------
+
+# Rename Variables
+
+anes <- anes %>% 
+  rename( 
+    poltrst = V161215, 
+    strglead = V162263, 
+    pplrule = V162264,
+    econcond = V161140x,
+    finsit = V162165, 
+    imharm = V162269, 
+    imecon = V162268,
+    imempl = V162158,
+    votechoice = V162034a,
+    income = V161361x,
+    race = V161310x,
+    gender = V161342,
+    edulevel = V161270 
+  ) %>% 
+  select(poltrst, strglead, pplrule, econcond, finsit, imharm, imecon, imempl, votechoice, income, race, gender, edulevel)
+
+anes_na_clean <- function(df) {
+  df %>%
+    mutate(across(everything(), ~ {
+      colname <- cur_column()
+      x <- haven::zap_labels(.x)
+      
+      if (colname == "votechoice") {
+        case_when(
+          x %in% c(-1, 3, 4, 5, 7, 9, -6, -7, -8, -9) ~ NA_real_, 
+          TRUE ~ as.numeric(x)
+          )
+      } else {
+        case_when(
+          x %in% c(-1, -5, -6, -7, -8, -9, 90, 95) ~ NA_real_,
+          TRUE ~ as.numeric(x)
+        )
+      }
+    }))
+}
+
+anes <- anes_na_clean(anes)
+
+anes_reverse_all <- function(df) {
+  df %>%
+    mutate(across(everything(), ~ {
+      colname <- cur_column()
+      
+      if (colname == "votechoice") {
+        case_when(
+          .x == 0 ~ 1,
+          .x == 2 ~ 1,
+          TRUE ~ as.numeric(.x)
+        )
+      } else if (colname == "race") {
+        case_when(
+          .x %in% c(2, 3, 4, 5, 6) ~ 0,
+          TRUE ~ as.numeric(.x)
+        )
+      } else if (colname == "gender") {
+        case_when(
+          .x == 2 ~ 0,
+          TRUE ~ as.numeric(.x)
+        )
+      } else if (colname %in% c("poltrst", "strglead", "econcond", "finsit")) {
+        case_when(
+          .x == 5 ~ 1,
+          .x == 2 ~ 4,
+          .x == 1 ~ 5,
+          .x == 4 ~ 2,
+          TRUE ~ as.numeric(.x)
+          )
+      }
+      
+      else {
+        .x  # untouched
+      }
+    }))
+}
+
+anes <- anes_reverse_all(anes)
+
+anes <- anes %>% 
+  rename(cgender = gender,
+         rpoltrst = poltrst, 
+         rstrglead = strglead,
+         reconcond = econcond,
+         rfinsit = finsit, 
+         cvotechoice = votechoice, 
+         cgender = gender, 
+         crace = race)
+
+anes %>% map(~ table(.x, useNA = "ifany"))
+
+Research_DataANES <- Research_DataANES %>% 
+  select(rpoltrst, rstrglead, pplrule, reconcond, rfinsit, imharm, imecon, imempl, cvotechoice, income, crace, cgender, edulevel)
+  
+
+Research_DataANES %>% map(~ table(.x, useNA = "ifany"))
+
+compare_dfs <- function(df1, df2) {
+  stopifnot(identical(names(df1), names(df2)), 
+            nrow(df1) == nrow(df2), 
+            ncol(df1) == ncol(df2))
+  
+  map2_dfr(df1, df2, ~ .x != .y) %>%
+    mutate(row = row_number()) %>%
+    pivot_longer(-row, names_to = "column") %>%
+    filter(value)  # only rows where values differ
+}
+
+
+df <- compare_dfs(anes, Research_DataANES)
+
+
+# poltrst -> rpoltrst # 
 
 Research_DataANES$poltrst <- ifelse(Research_DataANES$V161215 %in% c(-8, -9), NA, Research_DataANES$V161215)
 
-# Reversing Likert Scale # 
+Research_DataANES$votechoice <- ifelse(Research_DataANES$V162034a %in% c(-1, 3, 4, 5, 7, 9, -6, -7, -8, -9), NA, Research_DataANES$V162034a)
+
+Research_DataANES$cvotechoice <- recode(Research_DataANES$votechoice, '1 = 0; 2 = 1')# Reversing Likert Scale # 
 
 Research_DataANES$rpoltrst <- recode(Research_DataANES$poltrst, '1 = 5; 2 = 4; 5 = 1; 4 = 2')
 
@@ -95,9 +221,7 @@ table(Research_DataANES$imempl)
 
 table(Research_DataANES$V162034a)
 
-Research_DataANES$votechoice <- ifelse(Research_DataANES$V162034a %in% c(-1, 3, 4, 5, 7, 9, -6, -7, -8, -9), NA, Research_DataANES$V162034a)
 
-Research_DataANES$cvotechoice <- recode(Research_DataANES$votechoice, '1 = 0; 2 = 1')
 
 table(Research_DataANES$cvotechoice)
 
@@ -135,15 +259,17 @@ table(Research_DataANES$V161270)
 
 Research_DataANES$edulevel <- ifelse(Research_DataANES$V161270 %in% c(-9, 90, 95), NA, Research_DataANES$V161270)
 
-table(Research_DataANES$edulevel)
+table(anes$edulevel)
 
 glimpse(Research_DataANES)
 
 Research_DataANES <- Research_DataANES %>%  
-  select(poltrst, rpoltrst, strglead, pplrule, econcond, reconcond, finsit, rfinsit, imharm, imecon, imempl,
+  select(poltrst, rpoltrst, rstrglead, pplrule, econcond, reconcond, finsit, rfinsit, imharm, imecon, imempl,
     cvotechoice, income, gender, cgender, race, crace, edulevel)
 
 ?table
+
+
 
 # Data Analysis #
 
