@@ -11,7 +11,7 @@ trstplt_hincfel_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, hincfel)
 trstplt_imbgeco_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, imbgeco)
 trstplt_imueclt_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, imueclt)
 trstplt_imwbcnt_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, imwbcnt)
-trstplt_prtvtbitm_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, prtvtbitm)
+trstplt_prtvtbitm_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, prtvtbit)
 trstplt_prtvtbit_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, prtvtbit)
 trstplt_prtvtfnl_xtab <- cross_tab_diagnostic(ess_cleaned, trstplt, prtvtfnl)
 

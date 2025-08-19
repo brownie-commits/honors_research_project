@@ -16,8 +16,5 @@ data/
 *.csv
 *.log
 
-# Results 
-results/
-
 # Archived code
 code/archive/
