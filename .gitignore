@@ -1,8 +1,12 @@
-# Byte-compiled / optimized / DLL files
+# R
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# Python
 __pycache__/
 *.py[cod]
-
-# Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
 # Environment files
@@ -11,10 +15,12 @@ __pycache__/
 env/
 venv/
 
-# Data artifacts
-data/
-*.csv
+# Logs
 *.log
 
 # Archived code
 code/archive/
+
+# OS
+.DS_Store
+Thumbs.db
