@@ -126,6 +126,7 @@ read_and_clean_ess <- function(path) {
       trstplt,
       uemp3m
     ) %>% 
+    haven::zap_labels() %>%  # ADD THIS LINE
     mutate(
       uemp3m = ess_code_to_zero(uemp3m, 2),
       prtvtbit = ess_code_to_zero(prtvtbit, c(1:8, 10:13)) %>%
